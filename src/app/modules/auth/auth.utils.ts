@@ -5,8 +5,10 @@ import { httpStatus } from "../../config/httpStatus";
 export const createToken = (
     jwtPayload: { userEmail: string; role: string },
     secret: string,
-    expiresIn: string,
+    expiresIn: string | number,
 ) => {
+    if (!secret) throw new Error("JWT secret is required");
+
     return jwt.sign(jwtPayload, secret, {
         expiresIn,
     });

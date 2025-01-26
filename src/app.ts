@@ -1,7 +1,5 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
-import { ProductRouters } from "./app/modules/product/product.route";
-import { OrderRouters } from "./app/modules/order/order.route";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";

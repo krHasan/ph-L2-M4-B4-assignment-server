@@ -1,44 +1,114 @@
+import QueryBuilder from "../../builder/QueryBuilder";
+import { httpStatus } from "../../config/httpStatus";
+import AppError from "../../errors/AppError";
+import { PRODUCT_STATUS, productSearchableFields } from "./product.constant";
 import { TProduct } from "./product.interface";
 import { Product } from "./product.model";
 
 const createProductIntoDB = async (productData: TProduct) => {
-    const result = await Product.create(productData);
-    return result;
+    productData.inStock = productData.quantity > 0;
+
+    try {
+        const result = (await Product.create(productData)).populate("brand");
+        return result;
+    } catch (error) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Failed to add bike data");
+    }
 };
 
-const getAllProductsFromDB = async (searchTerm: string) => {
-    if (searchTerm) {
-        const searchPattern = new RegExp(searchTerm, "i");
-        return await Product.find({
-            $or: [
-                { name: searchPattern },
-                { brand: searchPattern },
-                { category: searchPattern },
-            ],
-        }).exec();
-    } else {
-        return await Product.find();
+const getAllProductsFromDB = async (query: Record<string, unknown>) => {
+    try {
+        const productQuery = new QueryBuilder(
+            Product.find().populate("brand"),
+            query,
+        )
+            .search(productSearchableFields)
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+
+        const result = await productQuery.modelQuery;
+        const metaData = await productQuery.getMetaData();
+
+        return { result, metaData };
+    } catch (error) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            "Failed to retrieve bike list",
+        );
     }
 };
 
 const getProductByIdFromDB = async (id: string) => {
-    const result = await Product.findById(id).exec();
-    return result;
+    try {
+        const isProductExist = await Product.isProductExist(id);
+        if (!isProductExist) {
+            throw new AppError(
+                httpStatus.NOT_FOUND,
+                "Bike data is not found with provided ID",
+            );
+        }
+        const result = await Product.findById(id).populate("brand").exec();
+        return result;
+    } catch (error) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            "Bike data is not found with provided ID",
+        );
+    }
 };
 
 const updateProductIntoDB = async (
     productId: string,
-    updateData: Partial<TProduct>
+    updateData: Partial<TProduct>,
 ) => {
-    const result = await Product.findByIdAndUpdate(productId, updateData, {
-        new: true,
-    }).exec();
-    return result;
+    try {
+        const isProductExist = await Product.isProductExist(productId);
+        if (!isProductExist) {
+            throw new AppError(
+                httpStatus.NOT_FOUND,
+                "Bike data is not found with provided ID",
+            );
+        }
+        if (updateData?.quantity || updateData?.quantity === 0) {
+            updateData.inStock = updateData.quantity > 0;
+        }
+        const result = await Product.findByIdAndUpdate(productId, updateData, {
+            new: true,
+        })
+            .populate("brand")
+            .exec();
+        return result;
+    } catch (error) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            "Failed to update bike data",
+        );
+    }
 };
 
 const deleteProductIntoDB = async (productId: string) => {
-    const result = await Product.deleteOne({ _id: productId }).exec();
-    return result;
+    try {
+        const isProductExist = await Product.isProductExist(productId);
+        if (!isProductExist) {
+            throw new AppError(
+                httpStatus.NOT_FOUND,
+                "Bike data is not found with provided ID",
+            );
+        }
+        const result = await Product.findByIdAndUpdate(
+            productId,
+            { isDeleted: true, status: PRODUCT_STATUS.inactive },
+            { new: true },
+        );
+        return result;
+    } catch (error) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            "Failed to delete bike data",
+        );
+    }
 };
 
 export const ProductServices = {

@@ -1,23 +1,58 @@
 import { model, Schema } from "mongoose";
-import { TProduct } from "./product.interface";
+import { ProductModal, TProduct } from "./product.interface";
+import { productCategoryArray, productStatusArray } from "./product.constant";
 
-const productSchema = new Schema<TProduct>(
+const productSchema = new Schema<TProduct, ProductModal>(
     {
         name: { type: String, required: true, maxlength: 255 },
-        brand: { type: String, required: true },
-        price: { type: Number, required: true },
-        category: {
-            type: String,
-            enum: ["Mountain", "Road", "Hybrid", "Electric"],
+        brand: {
+            type: Schema.Types.ObjectId,
+            ref: "Brand",
             required: true,
         },
-        description: { type: String, required: true },
-        quantity: { type: Number, required: true, min: 0 },
-        inStock: { type: Boolean, default: true },
+        model: { type: String },
+        price: { type: Number, required: true, default: 0.0 },
+        category: {
+            type: String,
+            enum: productCategoryArray,
+            required: true,
+        },
+        description: { type: String },
+        quantity: { type: Number, required: true, min: 0, default: 0 },
+        inStock: { type: Boolean, required: true },
+        status: {
+            type: String,
+            enum: productStatusArray,
+            default: "active",
+        },
+        isDeleted: { type: Boolean, default: false },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
-export const Product = model<TProduct>("Product", productSchema);
+productSchema.pre("find", function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
+productSchema.pre("aggregate", function (next) {
+    this.pipeline().unshift({
+        $match: { isDeleted: { $ne: true } },
+    });
+    next();
+});
+
+productSchema.pre("findOne", function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
+productSchema.statics.isProductExist = async function (
+    productId: string,
+): Promise<TProduct | null> {
+    return this.findById(productId);
+};
+
+export const Product = model<TProduct, ProductModal>("Product", productSchema);
