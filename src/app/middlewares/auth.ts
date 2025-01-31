@@ -25,9 +25,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
                 config.jwt_access_secret as string,
             );
 
-            const { role, userEmail, iat } = decoded;
+            const { role, useremail, iat } = decoded;
 
-            const user = await User.isUserExistsByEmail(userEmail);
+            const user = await User.isUserExistsByEmail(useremail);
             if (
                 !user ||
                 user?.isDeleted ||

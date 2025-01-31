@@ -15,7 +15,17 @@ router.post(
 );
 router.get("/", ProductControllers.getAllProducts);
 router.get("/:productId", ProductControllers.getProductById);
-router.patch("/:productId", ProductControllers.updateProduct);
-router.delete("/:productId", ProductControllers.deleteProductById);
+
+router.patch(
+    "/:productId",
+    auth(USER_ROLE.admin),
+    ProductControllers.updateProduct,
+);
+
+router.delete(
+    "/:productId",
+    auth(USER_ROLE.admin),
+    ProductControllers.deleteProductById,
+);
 
 export const ProductRoutes = router;

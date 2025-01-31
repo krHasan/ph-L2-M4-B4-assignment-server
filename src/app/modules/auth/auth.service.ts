@@ -18,11 +18,11 @@ const loginUser = async (payload: TLoginUser) => {
     );
 
     if (!isPasswordMatched) {
-        throw new AppError(httpStatus.FORBIDDEN, "Password didn't not matched");
+        throw new AppError(httpStatus.FORBIDDEN, "Password did not matched");
     }
 
     const jwtPayload = {
-        userEmail: user.email,
+        useremail: user.email,
         role: user.role,
     };
 
@@ -47,15 +47,15 @@ const loginUser = async (payload: TLoginUser) => {
 const refreshToken = async (token: string) => {
     const decoded = verifyToken(token, config.jwt_refresh_secret as string);
 
-    const { userEmail, iat } = decoded;
+    const { useremail, iat } = decoded;
 
-    const user = await User.isUserExistsByEmail(userEmail);
+    const user = await User.isUserExistsByEmail(useremail);
     if (!user || user?.isDeleted || user?.status === USER_STATUS.blocked) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");
     }
 
     const jwtPayload = {
-        userEmail: user.email,
+        useremail: user.email,
         role: user.role,
     };
 
