@@ -4,6 +4,10 @@ import { TUser } from "./user.interface";
 import { User } from "./user.model";
 import AppError from "../../errors/AppError";
 import { httpStatus } from "../../config/httpStatus";
+import { Order } from "../order/order.model";
+import { Product } from "../product/product.model";
+import { PRODUCT_STATUS } from "../product/product.constant";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const createUserIntoDB = async (userData: Partial<TUser>) => {
     const session = await mongoose.startSession();
@@ -27,6 +31,62 @@ const createUserIntoDB = async (userData: Partial<TUser>) => {
     }
 };
 
+const getAllUserFromDB = async (query: Record<string, unknown>) => {
+    try {
+        const userQuery = new QueryBuilder(User.find(), query)
+            .search(["name", "email"])
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+        const result = await userQuery.modelQuery;
+        const meta = await userQuery.getMetaData();
+
+        return { result, meta };
+    } catch (error) {
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Failed to retrieve user list",
+        );
+    }
+};
+
+const getCountSummaryFromDB = async () => {
+    try {
+        const totalUsers = await User.countDocuments({
+            isDeleted: false,
+        });
+
+        const totalProductsList = await Product.find({
+            isDeleted: false,
+            inStock: true,
+            status: PRODUCT_STATUS.active,
+        });
+
+        const totalOrders = await Order.estimatedDocumentCount();
+
+        const totalProducts = totalProductsList.reduce(
+            (acc, item) => acc + item.quantity,
+            0,
+        );
+
+        return {
+            totalUsers,
+            totalProducts,
+            totalOrders,
+        };
+    } catch (error: any) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const changeUserStatusIntoDB = async (id: string, payload: string) => {
+    console.log(id, payload);
+};
+
 export const UserServices = {
     createUserIntoDB,
+    getCountSummaryFromDB,
+    getAllUserFromDB,
+    changeUserStatusIntoDB,
 };

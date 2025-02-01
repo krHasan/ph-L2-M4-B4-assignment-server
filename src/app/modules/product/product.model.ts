@@ -1,6 +1,10 @@
 import { model, Schema } from "mongoose";
 import { ProductModal, TProduct } from "./product.interface";
-import { productCategoryArray, productStatusArray } from "./product.constant";
+import {
+    PRODUCT_STATUS,
+    productCategoryArray,
+    productStatusArray,
+} from "./product.constant";
 
 const productSchema = new Schema<TProduct, ProductModal>(
     {
@@ -23,7 +27,7 @@ const productSchema = new Schema<TProduct, ProductModal>(
         status: {
             type: String,
             enum: productStatusArray,
-            default: "active",
+            default: PRODUCT_STATUS.active,
         },
         isDeleted: { type: Boolean, default: false },
     },

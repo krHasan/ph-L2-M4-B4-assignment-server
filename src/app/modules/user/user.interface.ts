@@ -5,12 +5,6 @@ import { USER_ROLE, USER_STATUS } from "./user.constant";
 export type TUserRole = keyof typeof USER_ROLE;
 export type TUserStatus = keyof typeof USER_STATUS;
 
-export type TUserName = {
-    firstName: string;
-    middleName?: string;
-    lastName: string;
-};
-
 export interface TUser {
     name: string;
     email: string;

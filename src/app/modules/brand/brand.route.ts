@@ -13,6 +13,6 @@ router.post(
     validateRequest(BrandValidation.createBrandValidationSchema),
     BrandController.addBrand,
 );
-router.get("/", BrandController.getAllBrands);
+router.get("/", auth(USER_ROLE.admin), BrandController.getAllBrands);
 
 export const BrandRoutes = router;

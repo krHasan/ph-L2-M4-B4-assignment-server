@@ -34,7 +34,7 @@ const getAllProductsFromDB = async (query: Record<string, unknown>) => {
         return { result, metaData };
     } catch (error) {
         throw new AppError(
-            httpStatus.BAD_REQUEST,
+            httpStatus.INTERNAL_SERVER_ERROR,
             "Failed to retrieve bike list",
         );
     }
