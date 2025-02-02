@@ -80,8 +80,34 @@ const getCountSummaryFromDB = async () => {
     }
 };
 
-const changeUserStatusIntoDB = async (id: string, payload: string) => {
-    console.log(id, payload);
+const changeUserStatusIntoDB = async (
+    id: string,
+    payload: Record<string, unknown>,
+) => {
+    try {
+        const result = await User.findByIdAndUpdate({ _id: id }, payload, {
+            new: true,
+        });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const changeUserRoleIntoDB = async (
+    id: string,
+    payload: Record<string, unknown>,
+) => {
+    try {
+        const result = await User.findByIdAndUpdate({ _id: id }, payload, {
+            new: true,
+        });
+
+        return result;
+    } catch (error: any) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    }
 };
 
 export const UserServices = {
@@ -89,4 +115,5 @@ export const UserServices = {
     getCountSummaryFromDB,
     getAllUserFromDB,
     changeUserStatusIntoDB,
+    changeUserRoleIntoDB,
 };

@@ -35,6 +35,7 @@ const getCountSummary = catchAsync(async (req, res) => {
 });
 
 const changeUserStatus = catchAsync(async (req, res) => {
+    console.log(req.params, req.body);
     const result = await UserServices.changeUserStatusIntoDB(
         req.params.userId,
         req.body,
@@ -47,9 +48,24 @@ const changeUserStatus = catchAsync(async (req, res) => {
     });
 });
 
+const changeUserRole = catchAsync(async (req, res) => {
+    console.log(req.params, req.body);
+    const result = await UserServices.changeUserRoleIntoDB(
+        req.params.userId,
+        req.body,
+    );
+    sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "User role is changed successfully",
+        data: result,
+    });
+});
+
 export const UserControllers = {
     createUser,
     getAllUsers,
     getCountSummary,
     changeUserStatus,
+    changeUserRole,
 };
