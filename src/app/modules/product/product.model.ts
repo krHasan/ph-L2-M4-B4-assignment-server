@@ -22,6 +22,7 @@ const productSchema = new Schema<TProduct, ProductModal>(
             required: true,
         },
         description: { type: String },
+        image: { type: String },
         quantity: { type: Number, required: true, min: 0, default: 0 },
         inStock: { type: Boolean, required: true },
         status: {

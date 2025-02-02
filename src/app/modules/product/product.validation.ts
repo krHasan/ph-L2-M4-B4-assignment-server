@@ -11,10 +11,11 @@ const createProductValidationSchema = z.object({
             invalid_type_error: "Brand must be string",
             required_error: "Brand is required",
         }),
-        module: z.string().optional(),
+        model: z.string().optional(),
         price: z.number().positive("Price must be a positive number"),
         category: z.enum(productCategoryArray as [string, ...string[]]),
         description: z.string().optional(),
+        image: z.string().optional(),
         quantity: z
             .number()
             .int("Quantity must be an integer")
@@ -36,7 +37,7 @@ const updateProductValidationSchema = z.object({
                 required_error: "Brand is required",
             })
             .optional(),
-        module: z.string().optional(),
+        model: z.string().optional(),
         price: z
             .number()
             .positive("Price must be a positive number")
@@ -45,6 +46,7 @@ const updateProductValidationSchema = z.object({
             .enum(productCategoryArray as [string, ...string[]])
             .optional(),
         description: z.string().optional(),
+        image: z.string().optional(),
         quantity: z
             .number()
             .int("Quantity must be an integer")

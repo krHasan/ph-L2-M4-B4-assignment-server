@@ -11,6 +11,7 @@ export type TProduct = {
     price: number;
     category: TCategory;
     description?: string;
+    image?: string;
     quantity: number;
     inStock: boolean;
     status: TProductStatus;
