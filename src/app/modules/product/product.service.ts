@@ -1,11 +1,18 @@
 import QueryBuilder from "../../builder/QueryBuilder";
 import { httpStatus } from "../../config/httpStatus";
 import AppError from "../../errors/AppError";
+import { Brand } from "../brand/brand.model";
 import { PRODUCT_STATUS, productSearchableFields } from "./product.constant";
 import { TProduct } from "./product.interface";
 import { Product } from "./product.model";
 
 const createProductIntoDB = async (productData: TProduct) => {
+    const brand = await Brand.isBrandExists(String(productData.brand));
+    if (!brand) {
+        throw new AppError(httpStatus.NOT_FOUND, "Brand not found");
+    }
+
+    productData.brandName = brand.name;
     productData.inStock = productData.quantity > 0;
 
     try {
@@ -64,6 +71,14 @@ const updateProductIntoDB = async (
     updateData: Partial<TProduct>,
 ) => {
     try {
+        if (updateData.brand) {
+            const brand = await Brand.isBrandExists(String(updateData.brand));
+            if (!brand) {
+                throw new AppError(httpStatus.NOT_FOUND, "Brand not found");
+            }
+            updateData.brandName = brand.name;
+        }
+
         const isProductExist = await Product.isProductExist(productId);
         if (!isProductExist) {
             throw new AppError(

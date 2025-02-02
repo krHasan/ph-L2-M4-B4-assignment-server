@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import { TBrand } from "./brand.interface";
+import { BrandModel, TBrand } from "./brand.interface";
 
-const brandSchema = new Schema<TBrand>({
+const brandSchema = new Schema<TBrand, BrandModel>({
     name: {
         type: String,
         required: true,
@@ -11,4 +11,10 @@ const brandSchema = new Schema<TBrand>({
     },
 });
 
-export const Brand = model<TBrand>("Brand", brandSchema);
+brandSchema.statics.isBrandExists = async function (
+    brandId: string,
+): Promise<TBrand | null> {
+    return this.findById(brandId);
+};
+
+export const Brand = model<TBrand, BrandModel>("Brand", brandSchema);

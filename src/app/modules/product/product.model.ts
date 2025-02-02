@@ -15,6 +15,7 @@ const productSchema = new Schema<TProduct, ProductModal>(
             required: true,
         },
         model: { type: String },
+        brandName: { type: String },
         price: { type: Number, required: true, default: 0.0 },
         category: {
             type: String,

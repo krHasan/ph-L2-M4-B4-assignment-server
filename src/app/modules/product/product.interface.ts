@@ -7,6 +7,7 @@ export type TProductStatus = keyof typeof PRODUCT_STATUS;
 export type TProduct = {
     name: string;
     brand: Types.ObjectId;
+    brandName?: string;
     model?: string;
     price: number;
     category: TCategory;
