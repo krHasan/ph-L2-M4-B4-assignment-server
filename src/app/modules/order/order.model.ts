@@ -3,30 +3,54 @@ import { TOrder } from "./order.interface";
 
 const orderSchema = new Schema<TOrder>(
     {
-        email: {
+        userEmail: {
             type: String,
             required: true,
-            match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         },
-        product: {
-            type: Schema.Types.ObjectId,
-            ref: "Product",
-            required: true,
+        fullName: {
+            type: String,
         },
-        quantity: {
-            type: Number,
-            required: true,
-            min: 1,
+        mobile: {
+            type: String,
         },
+        address: {
+            type: String,
+        },
+        products: [
+            {
+                product: {
+                    type: Schema.Types.ObjectId,
+                    ref: "Product",
+                    required: true,
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                },
+            },
+        ],
         totalPrice: {
             type: Number,
             required: true,
-            min: 0,
+        },
+        status: {
+            type: String,
+            enum: ["Pending", "Paid", "Shipped", "Completed", "Cancelled"],
+            default: "Pending",
+        },
+        transaction: {
+            id: String,
+            transactionStatus: String,
+            bank_status: String,
+            sp_code: String,
+            sp_message: String,
+            method: String,
+            date_time: String,
         },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 export const Order = model<TOrder>("Order", orderSchema);

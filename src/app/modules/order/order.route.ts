@@ -5,7 +5,12 @@ import { USER_ROLE } from "../user/user.constant";
 
 const router = express.Router();
 
-router.post("/", auth(USER_ROLE.customer), OrderController.createAnOrder);
-router.get("/revenue", OrderController.calculateRevenue);
+router.post(
+    "/create-order",
+    auth(USER_ROLE.customer),
+    OrderController.createAnOrder,
+);
+router.get("/verify", OrderController.verifyPayment);
+router.get("/:userEmail", OrderController.getAllOrders);
 
 export const OrderRouters = router;

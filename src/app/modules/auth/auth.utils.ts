@@ -9,9 +9,10 @@ export const createToken = (
 ) => {
     if (!secret) throw new Error("JWT secret is required");
 
-    return jwt.sign(jwtPayload, secret, {
-        expiresIn,
-    });
+    return null;
+    // return jwt.sign(jwtPayload, secret, {
+    //     expiresIn,
+    // });
 };
 
 export const verifyToken = (token: string, secret: string) => {
