@@ -1,18 +1,23 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
 import { httpStatus } from "../../config/httpStatus";
+
+type StringValue = any;
 
 export const createToken = (
     jwtPayload: { useremail: string; role: string },
     secret: string,
-    expiresIn: string | number,
+    expiresIn: number | StringValue | undefined,
 ) => {
     if (!secret) throw new Error("JWT secret is required");
 
-    return null;
-    // return jwt.sign(jwtPayload, secret, {
-    //     expiresIn,
-    // });
+    const signOptions: SignOptions = {
+        expiresIn: expiresIn, // Ensure this matches the correct type
+    };
+
+    return jwt.sign(jwtPayload, secret, {
+        expiresIn,
+    });
 };
 
 export const verifyToken = (token: string, secret: string) => {

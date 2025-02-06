@@ -1,4 +1,3 @@
-import { JwtPayload } from "jsonwebtoken";
 import { httpStatus } from "../../config/httpStatus";
 import AppError from "../../errors/AppError";
 import { Product } from "../product/product.model";
@@ -33,42 +32,85 @@ const createAnOrderIntoDB = async (
         }),
     );
 
-    let order = await Order.create({
-        userEmail: payload.userEmail,
-        fullName: payload.fullName,
-        mobile: payload.mobile,
-        address: payload.address,
-        products: productDetails,
-        totalPrice,
-    });
+    const session = await Order.startSession();
+    session.startTransaction();
+    try {
+        //first find the product
+        productDetails.forEach(async (element) => {
+            const product = await Product.findById(element?.product).session(
+                session,
+            );
 
-    console.log(user);
+            //checking whether the product is available or not
+            if (!product) {
+                throw new Error("Product not found");
+            }
 
-    // payment integration
-    const shurjopayPayload = {
-        amount: totalPrice,
-        order_id: order._id,
-        currency: "BDT",
-        customer_name: user[0].name,
-        customer_address: payload.address,
-        customer_email: user[0].email,
-        customer_phone: payload.mobile,
-        customer_city: "Dhaka",
-        client_ip,
-    };
-
-    const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
-
-    if (payment?.transactionStatus) {
-        order = await order.updateOne({
-            transaction: {
-                id: payment.sp_order_id,
-                transactionStatus: payment.transactionStatus,
-            },
+            //checking the stock
+            if (element?.quantity && product.quantity < element?.quantity) {
+                throw new Error("Insufficient quantity available in inventory");
+            }
         });
-    }
 
-    return payment.checkout_url;
+        let order = await Order.create({
+            userEmail: payload.userEmail,
+            fullName: payload.fullName,
+            mobile: payload.mobile,
+            address: payload.address,
+            products: productDetails,
+            totalPrice,
+        });
+
+        if (!order)
+            throw new AppError(
+                httpStatus.NOT_ACCEPTABLE,
+                "Order couldn't be created",
+            );
+
+        //updating the quantity
+        productDetails.forEach(async (element) => {
+            const product = await Product.findById(element?.product).session(
+                session,
+            );
+            if (element?.quantity && product?.quantity) {
+                product!.quantity -= element?.quantity;
+                product.inStock = product.quantity > 0;
+                await product?.save({ session });
+            }
+        });
+
+        // payment integration
+        const shurjopayPayload = {
+            amount: totalPrice,
+            order_id: order._id,
+            currency: "BDT",
+            customer_name: user[0].name,
+            customer_address: payload.address,
+            customer_email: user[0].email,
+            customer_phone: payload.mobile,
+            customer_city: "Dhaka",
+            client_ip,
+        };
+
+        const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
+
+        if (payment?.transactionStatus) {
+            order = await order.updateOne({
+                transaction: {
+                    id: payment.sp_order_id,
+                    transactionStatus: payment.transactionStatus,
+                },
+            });
+        }
+
+        await session.commitTransaction();
+        return payment.checkout_url;
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
 };
 
 const getAllOrdersFromDB = async (email: string) => {
