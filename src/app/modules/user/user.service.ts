@@ -8,6 +8,8 @@ import { Order } from "../order/order.model";
 import { Product } from "../product/product.model";
 import { PRODUCT_STATUS } from "../product/product.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
+import { JwtPayload } from "jsonwebtoken";
+import { USER_ROLE } from "./user.constant";
 
 const createUserIntoDB = async (userData: Partial<TUser>) => {
     const session = await mongoose.startSession();
@@ -110,10 +112,17 @@ const changeUserRoleIntoDB = async (
     }
 };
 
+const getMe = async (decoded: JwtPayload) => {
+    const { useremail } = decoded;
+    let result = await User.findOne({ email: useremail });
+    return result;
+};
+
 export const UserServices = {
     createUserIntoDB,
     getCountSummaryFromDB,
     getAllUserFromDB,
     changeUserStatusIntoDB,
     changeUserRoleIntoDB,
+    getMe,
 };

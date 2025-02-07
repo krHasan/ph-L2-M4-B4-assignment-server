@@ -60,10 +60,22 @@ const changeUserRole = catchAsync(async (req, res) => {
     });
 });
 
+const getMe = catchAsync(async (req, res) => {
+    const user = req.user;
+    const result = await UserServices.getMe(user);
+    sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "Data retrieved successfully",
+        data: result,
+    });
+});
+
 export const UserControllers = {
     createUser,
     getAllUsers,
     getCountSummary,
     changeUserStatus,
     changeUserRole,
+    getMe,
 };

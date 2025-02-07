@@ -16,6 +16,12 @@ router.post(
 router.get("/", auth(USER_ROLE.admin), UserControllers.getAllUsers);
 
 router.get(
+    "/me",
+    auth(USER_ROLE.customer, USER_ROLE.admin),
+    UserControllers.getMe,
+);
+
+router.get(
     "/admin-dashboard/count-summary",
     auth(USER_ROLE.admin),
     UserControllers.getCountSummary,

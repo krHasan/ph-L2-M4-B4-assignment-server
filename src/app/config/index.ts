@@ -18,6 +18,8 @@ export default {
     cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
     super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
+    send_email_creds_email: process.env.SEND_EMAIL_CREDS_EMAIL,
+    send_email_creds_password: process.env.SEND_EMAIL_CREDS_PASSWORD,
     sp: {
         sp_endpoint: process.env.SP_ENDPOINT,
         sp_username: process.env.SP_USERNAME,
